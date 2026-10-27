@@ -26,7 +26,7 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
-    headless: false,
+    headless: !!process.env.CI, // headless in CI (runner service has no desktop); --headed still overrides
     viewport: { width: 1280, height: 720 }, // Set default viewport size for consistency
     ignoreHTTPSErrors: true, // Ignore SSL errors if necessary
     permissions: ["geolocation"], // Set necessary permissions for geolocation-based tests

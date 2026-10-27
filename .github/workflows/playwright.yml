@@ -43,7 +43,8 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    runs-on: windows-latest
+    # Self-hosted: fakestoreapi.com (Cloudflare) returns 403 to GitHub-hosted runner IPs
+    runs-on: [self-hosted, windows]
 
     steps:
       - name: 📥 Checkout Repository
