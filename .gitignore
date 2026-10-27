@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Environment & secrets (keep .env.example committed)
+.env
+
+# Test artifacts & reports
+test-results/
+reports/
+playwright-report/
+custom-report/
+allure-results/
+allure-report/
+blob-report/
+
+# Playwright / agent cache
+/playwright/.cache/
+/playwright/.auth/
+.playwright-cli/
+.playwright-mcp/
+
+# Build output
+dist/
+
+# OS / IDE
+.DS_Store
+Thumbs.db

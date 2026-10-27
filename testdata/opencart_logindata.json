@@ -1,0 +1,8 @@
+[
+  { "testName": "Valid login", "email": "farukh43@gmail.com", "password": "test@123", "expected": "success" },
+  { "testName": "Unregistered email", "email": "unregistered_user@xyz.com", "password": "test@123", "expected": "failure" },
+  { "testName": "Unregistered email and wrong password", "email": "nouser_ddt@xyz.com", "password": "wrong@999", "expected": "failure" },
+  { "testName": "Blank email", "email": "", "password": "test@123", "expected": "failure" },
+  { "testName": "Blank password", "email": "blankpass_ddt@xyz.com", "password": " ", "expected": "failure" },
+  { "testName": "Blank email and password", "email": "", "password": "", "expected": "failure" }
+]
