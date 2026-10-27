@@ -64,6 +64,12 @@ jobs:
       - name: ⚙️ Create .env File
         run: Copy-Item .env.example .env
 
+      - name: 🔍 Check API Reachability
+        continue-on-error: true
+        run: |
+          # Shows the status and first lines of the body, e.g. a Cloudflare block page when the runner IP is blocked
+          curl.exe -s -i https://fakestoreapi.com/products/1 | Select-Object -First 25
+
       - name: 🧪 Run Playwright Tests
         run: |
           # Scheduled runs have no inputs, so they run the full @master suite
@@ -73,7 +79,8 @@ jobs:
           $tag = $suite -replace 'test:', ''
           $browserFlag = "--project=$browser"
           $modeFlag = if ($mode -eq 'headed') { '--headed' } else { '' }
-          npx playwright test --grep "@$tag" $browserFlag $modeFlag --reporter=dot --output=test-results
+          # No --reporter flag: it would replace the config reporters, so no HTML/Allure/custom report gets written
+          npx playwright test --grep "@$tag" $browserFlag $modeFlag --output=test-results
         env:
           CI: "1"
           # dotenv does not override variables already set, so these take precedence over .env.example placeholders
