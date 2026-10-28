@@ -20,7 +20,6 @@ on:
           - test:sanity
           - test:regression
           - test:e2e
-          - test:api
           - test:web
           - test:datadriven
         default: "test:e2e"
@@ -43,8 +42,7 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    # Self-hosted: fakestoreapi.com (Cloudflare) returns 403 to GitHub-hosted runner IPs
-    runs-on: [self-hosted, windows]
+    runs-on: windows-latest
 
     steps:
       - name: 📥 Checkout Repository
@@ -80,7 +78,8 @@ jobs:
           $browserFlag = "--project=$browser"
           $modeFlag = if ($mode -eq 'headed') { '--headed' } else { '' }
           # No --reporter flag: it would replace the config reporters, so no HTML/Allure/custom report gets written
-          npx playwright test --grep "@$tag" $browserFlag $modeFlag --output=test-results
+          # API tests are skipped in CI: fakestoreapi.com (Cloudflare) returns 403 to GitHub-hosted runner IPs
+          npx playwright test --grep "@$tag" --grep-invert "@api" $browserFlag $modeFlag --output=test-results
         env:
           CI: "1"
           # dotenv does not override variables already set, so these take precedence over .env.example placeholders

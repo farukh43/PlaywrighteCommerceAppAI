@@ -22,7 +22,7 @@ framework conventions in [`playwright-mcp-context.md`](playwright-mcp-context.md
 - **Test data:** Faker (random data), CSV / JSON / Excel readers for data-driven tests
 - **Config:** `dotenv` (`.env`)
 - **Reporting:** list, HTML, JUnit, Allure, and a custom HTML reporter
-- **CI:** GitHub Actions (self-hosted Windows runner, weekly schedule)
+- **CI:** GitHub Actions (GitHub-hosted Windows runner, web tests only, weekly schedule)
 
 ---
 
@@ -182,20 +182,25 @@ Workflow: [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml)
 | Schedule — every Saturday 12:00 AM EST (`0 5 * * 6` UTC) | `@master` |
 | Manual (Actions → 🎭 Playwright Tests → Run workflow) | Choose suite, browser, headed/headless |
 
+Every CI run excludes `@api` tests (`--grep-invert "@api"`), so CI runs the web tests only.
+
 Steps: checkout → Node setup → `npm ci` → install browsers → create `.env` from `.env.example` →
 API reachability check → run tests → upload `playwright-report`, `custom-report` and `allure-results` artifacts.
 
-### Why a self-hosted runner
+### Why API tests are skipped in CI
 
 `fakestoreapi.com` sits behind Cloudflare, which answers GitHub-hosted runner IPs with **403** (`Cf-Mitigated: challenge`),
-so every API test failed on `windows-latest`. The job therefore runs on `[self-hosted, windows]`.
+so every API test fails on `windows-latest`. Run API tests locally with `npm run test:api`.
 
-Register the runner once: repo → **Settings → Actions → Runners → New self-hosted runner** → Windows x64, run the
-shown download and `config.cmd` commands in an admin PowerShell in `C:\actions-runner`, and answer **Y** to run it
-as a service. (Started with `./run.cmd` instead, it only listens while that window stays open.)
+To run them in CI later, use a self-hosted runner:
 
-The runner machine must be on at the scheduled time; queued jobs are cancelled after 24 hours. Switch back to
-`runs-on: windows-latest` if no runner is available (API tests will then fail with 403).
+1. Repo → **Settings → Actions → Runners → New self-hosted runner** → Windows x64.
+2. Install it in `C:\actions-runner` — **not** under `C:\Windows\System32`, where Windows redirects 32-bit tools
+   and `actions/setup-node` fails to extract Node (`7zr.exe ... failed with exit code 2`).
+3. Answer **Y** to run it as a service.
+4. In the workflow set `runs-on: [self-hosted, windows]` and remove `--grep-invert "@api"`.
+
+The runner machine must be on at the scheduled time; queued jobs are cancelled after 24 hours.
 
 ### Repository secrets
 
