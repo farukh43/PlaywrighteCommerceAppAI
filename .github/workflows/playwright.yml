@@ -43,9 +43,8 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    # Note: fakestoreapi.com (Cloudflare) returns 403 to GitHub-hosted runner IPs, so API tests fail here.
-    # Switch to [self-hosted, windows] once a self-hosted runner is registered to run them.
-    runs-on: windows-latest
+    # Self-hosted: fakestoreapi.com (Cloudflare) returns 403 to GitHub-hosted runner IPs
+    runs-on: [self-hosted, windows]
 
     steps:
       - name: 📥 Checkout Repository

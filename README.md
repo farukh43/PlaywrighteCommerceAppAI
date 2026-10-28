@@ -22,7 +22,7 @@ framework conventions in [`playwright-mcp-context.md`](playwright-mcp-context.md
 - **Test data:** Faker (random data), CSV / JSON / Excel readers for data-driven tests
 - **Config:** `dotenv` (`.env`)
 - **Reporting:** list, HTML, JUnit, Allure, and a custom HTML reporter
-- **CI:** GitHub Actions (GitHub-hosted Windows runner, weekly schedule)
+- **CI:** GitHub Actions (self-hosted Windows runner, weekly schedule)
 
 ---
 
@@ -185,18 +185,17 @@ Workflow: [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml)
 Steps: checkout → Node setup → `npm ci` → install browsers → create `.env` from `.env.example` →
 API reachability check → run tests → upload `playwright-report`, `custom-report` and `allure-results` artifacts.
 
-### Known issue: API tests fail in CI (403)
+### Why a self-hosted runner
 
-The job runs on GitHub-hosted `windows-latest`. `fakestoreapi.com` sits behind Cloudflare and returns **403** to
-GitHub-hosted runner IPs, so every API test fails in CI while the web tests pass. Locally all tests pass.
+`fakestoreapi.com` sits behind Cloudflare, which answers GitHub-hosted runner IPs with **403** (`Cf-Mitigated: challenge`),
+so every API test failed on `windows-latest`. The job therefore runs on `[self-hosted, windows]`.
 
-To run the API tests in CI, use a self-hosted runner:
+Register the runner once: repo → **Settings → Actions → Runners → New self-hosted runner** → Windows x64, run the
+shown download and `config.cmd` commands in an admin PowerShell in `C:\actions-runner`, and answer **Y** to run it
+as a service. (Started with `./run.cmd` instead, it only listens while that window stays open.)
 
-1. Repo → **Settings → Actions → Runners → New self-hosted runner** → Windows x64.
-2. Run the shown commands in an admin PowerShell in `C:\actions-runner`; answer **Y** to run it as a service.
-3. Change `runs-on: windows-latest` to `runs-on: [self-hosted, windows]` in the workflow.
-
-The runner machine must be on at the scheduled time; queued jobs are cancelled after 24 hours.
+The runner machine must be on at the scheduled time; queued jobs are cancelled after 24 hours. Switch back to
+`runs-on: windows-latest` if no runner is available (API tests will then fail with 403).
 
 ### Repository secrets
 
