@@ -184,6 +184,11 @@ Workflow: [`.github/workflows/playwright.yml`](.github/workflows/playwright.yml)
 
 Every CI run excludes `@api` tests (`--grep-invert "@api"`), so CI runs the web tests only.
 
+After the tests, the `allure-report` job builds the Allure report and publishes it to GitHub Pages
+(`https://farukh43.github.io/PlaywrighteCommerceAppAI/`). The link appears on the run page and in the job summary,
+along with the pass/fail counts. Pages shows only the latest run. One-time setup: repo → **Settings → Pages →
+Build and deployment → Source: GitHub Actions**.
+
 Steps: checkout → Node setup → `npm ci` → install browsers → create `.env` from `.env.example` →
 API reachability check → run tests → upload `playwright-report`, `custom-report` and `allure-results` artifacts.
 

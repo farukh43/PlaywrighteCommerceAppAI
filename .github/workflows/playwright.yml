@@ -110,3 +110,57 @@ jobs:
           name: allure-results
           path: allure-results/
           retention-days: 30
+
+  # Builds the Allure report from the test job's results and publishes it to GitHub Pages.
+  # The link appears on the run page (deployment URL) and in the job summary.
+  allure-report:
+    needs: test
+    # Pages only deploys from the default branch, so skip pull requests
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: allure-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: 📥 Download Allure Results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: 📈 Generate Allure Report
+        run: npx -y allure-commandline generate allure-results -o allure-report --clean
+
+      - name: 📦 Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report
+
+      - name: 🚀 Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+      - name: 📝 Add Report Link to Summary
+        run: |
+          stats=$(jq -r '.statistic | "| \(.total) | \(.passed) | \(.failed) | \(.broken) | \(.skipped) |"' allure-report/widgets/summary.json)
+          {
+            echo "## 📈 Allure Report"
+            echo ""
+            echo "**[Open the Allure report](${{ steps.deploy.outputs.page_url }})**"
+            echo ""
+            echo "| Total | Passed | Failed | Broken | Skipped |"
+            echo "|---|---|---|---|---|"
+            echo "$stats"
+          } >> "$GITHUB_STEP_SUMMARY"
